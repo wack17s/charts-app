@@ -1,9 +1,9 @@
 // @flow
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import styles from './Counter.css';
+import styles from './KoefDempf2.css';
 
-class Counter extends Component {
+class KoefDempf2 extends Component {
   props: {
     increment: () => void,
     incrementIfOdd: () => void,
@@ -39,4 +39,4 @@ class Counter extends Component {
   }
 }
 
-export default Counter;
+export default KoefDempf2;
