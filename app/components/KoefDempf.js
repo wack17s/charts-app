@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 import styles from './KoefDempf.css';
 
@@ -10,7 +11,6 @@ class KoefDempf extends Component {
     super(props);
     this.state = {
     	a: {
-	      label: "a",
     		one: 1,
 	      two: 2,
 	      three: 3,
@@ -23,7 +23,6 @@ class KoefDempf extends Component {
 	      ten: 10
     	},
     	b: {
-	      label: "b",
     		one: 1,
 	      two: 2,
 	      three: 3,
@@ -34,8 +33,45 @@ class KoefDempf extends Component {
 	      eight: 8,
 	      nine: 9,
 	      ten: 10
-    	}
+    	},
+    	m: 1.09,
+    	h: 10.5,
+    	row: "a",
+    	column: 'k',
+    	ready: false
     };
+  }
+
+  componentDidMount() {
+  	this.getK();
+  }
+
+  getK = () => {
+  	const k = {};
+
+  	const dictionary = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+
+  	for (let i = 1; i <= 10; i++) {
+  		k[dictionary[i]] = Math.round(2 * this.state.m * this.state.a[dictionary[i]] * this.state.a[dictionary[i]] *
+  			this.state.a[dictionary[i]] * this.state.b[dictionary[i]] *
+  			this.state.b[dictionary[i]] * this.state.b[dictionary[i]] /
+  			(this.state.h * this.state.h * this.state.h * 
+  			(this.state.a[dictionary[i]] * this.state.a[dictionary[i]] + this.state.b[dictionary[i]] * this.state.b[dictionary[i]])) * 1000) / 1000;
+  	}
+
+  	this.setState({ k, ready: true });
+  }
+
+  prepareChartData = () => {
+  	const dictionary = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+
+  	const res = [];
+
+  	for (let i = 1; i <= 10; i++) {
+  		res.push({ row: this.state[this.state.row][dictionary[i]], column: this.state[this.state.column][dictionary[i]] });
+  	}
+
+  	return res;
   }
 
   onAfterSaveCell = (row, cellName, cellValue) => {
@@ -43,17 +79,24 @@ class KoefDempf extends Component {
 
 	  const rowStr = {};
 	  for (const prop in row) {
-	    rowStr[prop] = row[prop];
+	  	if (prop !== "label") {
+	    	rowStr[prop] = parseInt(row[prop]);
+	    }
 	  }
 
-	  this.setState({ [rowStr.label]: { ...rowStr } });
+	  this.setState({ [row.label]: { ...rowStr } }, () => this.getK());
 	}
 
    render() {
    	const products = [{
+	      label: "a",
 	      ...this.state.a
 	  }, {
+	      label: "b",
 	      ...this.state.b
+	  }, {
+	  		label: "k",
+	      ...this.state.k
 	  }];
 
 	  const cellEditProp = {
@@ -78,9 +121,23 @@ class KoefDempf extends Component {
 	          <TableHeaderColumn dataField='ten'>10</TableHeaderColumn>
 	      </BootstrapTable>
 	      <p />
-	      	      m(мю) = <input type="text" value={2} />
+	      m(мю) = <input type="text" value={this.state.m} />
 	      <p />
-	      h = <input type="text" value={10} />
+	      h = <input type="text" value={this.state.h} />
+	      <p />
+
+	     	{this.state.ready
+	     		? (<LineChart width={600} height={300} data={this.prepareChartData()}
+		        	margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+			       <XAxis dataKey="row"/>
+			       <YAxis/>
+			       <CartesianGrid strokeDasharray="3 3"/>
+			       <Tooltip/>
+			       <Legend />
+			       <Line type="monotone" dataKey="row" stroke="#8884d8" activeDot={{r: 8}}/>
+			       <Line type="monotone" dataKey="column" stroke="#82ca9d" />
+			      </LineChart>)
+	     		: null}
 	     </div>
     );
   }
