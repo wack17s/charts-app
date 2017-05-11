@@ -6,7 +6,7 @@ import styles from './Home.css';
 export default class Home extends Component {
 	render() {
 		return (
-			<div>
+			<div className='div'>
 				<h2>ГАЗОВОЕ ДЕМПФИРОВАНИЕ ЧЭ МИКРОАКСЕЛЕРОМЕТРОВ</h2>
 				<div className={styles.container} data-tid="container">
 					<Link to="/koefDempf">Коэффициент демпфирования в направлении оси y.</Link>
